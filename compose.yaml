@@ -1,0 +1,14 @@
+version: "1"
+
+services:
+  app:
+    build:
+      context: .
+      target: development
+    ports:
+      - 127.0.0.1:3000:3000
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./tmp/db:/app/tmp/db
+    command: sh -c "npm ci && npm run dev"

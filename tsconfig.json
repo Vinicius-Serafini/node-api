@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2020",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "outDir": "dist",
+    "baseUrl": "./src",
+    "rootDir": "./src",
+    "paths": {
+      "@database/*": [
+        "database/*"
+      ],
+      "@entities/*": [
+        "entities/*"
+      ],
+      "@providers/*": [
+        "providers/*"
+      ],
+      "@routes/*": [
+        "routes/*"
+      ],
+      "@shared/*": [
+        "shared/*"
+      ],
+      "@/*": [
+        "*"
+      ],
+      "*": [
+        "src/shared/types/*"
+      ],
+    }
+  },
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+  ],
+}
