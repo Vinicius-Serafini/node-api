@@ -1,6 +1,6 @@
 import TaskEntity from "@/entity/task.entity.js";
 import TaskProvider from "@providers/task.provider.js";
-import { NewTask } from "@shared/types/index.js";
+import { NewTask, Task } from "@shared/types/index.js";
 import { Request, Response, Router } from "express";
 
 class TaskController {
@@ -29,13 +29,13 @@ class TaskController {
     return router;
   }
 
-  async getTasks(_: Request, res: Response) {
+  async getTasks(_: Request, res: Response<Array<Task>>) {
     const tasks = await this.taskProvider.getTasks();
 
-    return res.json(tasks);
+    return res.json(tasks.map(task => task.serialize()));
   }
 
-  async getTaskById(req: Request, res: Response) {
+  async getTaskById(req: Request, res: Response<Task | { message: string }>) {
     const { id } = req.params;
 
     const task = await this.taskProvider.getTaskById(Number(id));
@@ -44,32 +44,32 @@ class TaskController {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    return res.json(task);
+    return res.json(task.serialize());
   }
 
-  async createTask(req: Request, res: Response) {
-    const taskBody: NewTask = TaskEntity.create(req.body);
+  async createTask(req: Request<{}, Task, NewTask>, res: Response<Task>) {
+    const taskBody = req.body;
 
-    const { sucess, errors } = TaskEntity.validate(taskBody);
-
-    if (!sucess) {
-      return res.status(400).json(Object.fromEntries(errors.entries()));
+    try {
+      TaskEntity.validate(taskBody);
+    } catch (error) {
+      return res.status(400).json(error);
     }
 
     const task = await this.taskProvider.createTask(taskBody);
 
-    return res.json(task);
+    return res.json(task.serialize()).status(201);
   }
 
-  async updateTask(req: Request, res: Response) {
+  async updateTask(req: Request<{ id: Number }, Task, NewTask>, res: Response<Task | { message: string }>) {
     const { id } = req.params;
 
-    const task = TaskEntity.create(req.body);
+    const task = req.body;
 
-    const { sucess, errors } = TaskEntity.validate(task);
-
-    if (!sucess) {
-      return res.status(400).json(Object.fromEntries(errors.entries()));
+    try {
+      TaskEntity.validate(task);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
     }
 
     if (!id || Number(id) < 1) {
@@ -77,25 +77,25 @@ class TaskController {
     }
 
     try {
-      const udatedTask = await this.taskProvider.updateTask(Number(id), task);
-      return res.json(udatedTask);
+      const updatedTask = await this.taskProvider.updateTask(Number(id), task);
+      return res.json(updatedTask.serialize());
 
     } catch (error) {
       return res.status(404).json({ message: "Task not found" });
     }
   }
 
-  async deleteTask(req: Request, res: Response) {
+  async deleteTask(req: Request<{ id: number }>, res: Response<{ message: string }>) {
     const { id } = req.params;
 
-    if (!id || Number(id) < 1) {
+    if (!id || id < 1) {
       return res.status(404).json({ message: "Task not found" });
     }
 
     try {
-      await this.taskProvider.deleteTask(Number(id));
+      await this.taskProvider.deleteTask(id);
 
-      return res.json({ message: "Task deleted" });
+      return res.json().status(204);
     } catch (error) {
       return res.status(404).json({ message: "Task not found" });
     }

@@ -3,6 +3,7 @@ export type Task = {
   title: string;
   description: string;
   done: boolean;
+  dueDate?: string;
 }
 
 export type NewTask = Omit<Task, "id">

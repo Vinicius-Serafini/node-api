@@ -1,42 +1,51 @@
 import { NewTask, Task } from "@shared/types/index.js";
 
 export default class TaskEntity {
-  static validate(task: Partial<NewTask>): { sucess: boolean, errors?: Map<string, string> } {
-    const errors = new Map();
+  id: number;
+  title: string;
+  description: string;
+  done: boolean;
+  dueDate?: Date;
 
+  constructor({ id, title, description, done, dueDate }: Task) {
+    this.title = title;
+    this.description = description;
+    this.done = done;
+    this.id = id;
+
+    if (dueDate) {
+      this.dueDate = new Date(dueDate);
+    }
+  }
+
+  static validate(task: Partial<Task | NewTask>): boolean {
     if (typeof task.title !== 'string' || task.title.length === 0) {
-      errors.set("title", "Title is required");
+      throw new Error("Title is required");
     }
 
     if (typeof task.description !== "string" || task.description.length === 0) {
-      errors.set("description", "Description is required");
+      throw new Error("Description is required");
     }
 
     if (typeof task.done !== "boolean") {
-      errors.set("done", "Done is required");
+      throw new Error("Done is required");
     }
 
-    if (errors.size > 0) {
-      return { sucess: false, errors };
-    }
-
-    return { sucess: true };
+    return true;
   }
 
-  static create(task: Partial<NewTask>): NewTask {
-    return {
-      title: task.title,
-      description: task.description,
-      done: false
+  serialize(): Task {
+    const task: Task = {
+      id: this.id,
+      title: this.title,
+      description: this.description,
+      done: this.done
     }
-  }
 
-  static serialize(json: any): Task {
-    return {
-      id: json.id,
-      title: json.title,
-      description: json.description,
-      done: Boolean(json.done)
+    if (this.dueDate) {
+      task.dueDate = this.dueDate.toISOString();
     }
+
+    return task;
   }
 }
