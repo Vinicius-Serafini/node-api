@@ -17,10 +17,9 @@ async function createServer() {
   const taskController = new TaskController(taskProvider);
 
   app.use(taskController.getRoutes());
-  app.get('tasks', taskController.getTasks);
 
   app.get('/', (req: express.Request, res: express.Response) => {
-    res.send('Hello World!!!');
+    res.json({ message: "Hello World" });
   });
 
   app.listen(3000, () => {
